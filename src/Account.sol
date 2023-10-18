@@ -24,10 +24,13 @@ contract SimpleAccount is IERC165, IERC1271, IERC6551Account {
 
     event Locked(uint256 lockedUntil, uint256 nonce);
 
-    receive() external payable {}
+    bytes32 immutable DOMAIN_SEPARATOR;
 
-    function lockHash() public view returns (bytes32 op712Hash) {
-        bytes32 domainSeparator = keccak256(
+    bytes32 constant LOCK_TYPEHASH = keccak256("Lock(address owner,uint256 nonce)");
+    bytes32 constant UNLOCK_TYPEHASH = keccak256("Unlock(address owner,uint256 nonce)");
+
+    constructor() {
+        DOMAIN_SEPARATOR = keccak256(
             abi.encode(
                 keccak256(
                     "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
@@ -38,29 +41,39 @@ contract SimpleAccount is IERC165, IERC1271, IERC6551Account {
                 address(this)
             )
         );
-        bytes32 hashStruct = keccak256(
-            abi.encode(
-                keccak256("Lock(address owner,uint256 nonce)"),
-                owner(),
-                nonce
-            )
-        );
+    }
 
-        op712Hash = MessageHashUtils.toTypedDataHash(domainSeparator, hashStruct);
+    receive() external payable {}
+
+    function lockHash() public view returns (bytes32) {
+        bytes32 hashStruct = keccak256(abi.encode(LOCK_TYPEHASH, owner(), nonce));
+        return MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashStruct);
+    }
+    function unlockHash() public view returns (bytes32) {
+        bytes32 hashStruct = keccak256(abi.encode(UNLOCK_TYPEHASH, owner(), nonce));
+        return MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashStruct);
     }
 
     function lock(
         bytes memory permission
     ) public {
-        bytes4 valid = _isValidSignature(
-            lockHash(),
-            permission
-        );
+        bytes4 valid = _isValidSignature(lockHash(), permission);
         if (valid != IERC1271.isValidSignature.selector) revert();
 
         ++nonce;
 
         locked = true;
+    }
+
+    function unlock(
+        bytes memory permission
+    ) public {
+        bytes4 valid = _isValidSignature(unlockHash(), permission);
+        if (valid != IERC1271.isValidSignature.selector) revert();
+
+        ++nonce;
+
+        locked = false;
     }
 
     function executeCall(
