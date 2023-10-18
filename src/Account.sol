@@ -16,10 +16,10 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 import {console2} from "forge-std/console2.sol";
 
-contract SimpleAccount is IERC165, IERC1271, IERC6551Account {
+contract SimpleAccount is IERC165, IERC1271, IERC721Receiver, IERC6551Account {
     
     uint256 public nonce;
-    bool locked;
+    bool public locked;
     using ECDSA for bytes32;
 
     event Locked(uint256 lockedUntil, uint256 nonce);
@@ -57,6 +57,7 @@ contract SimpleAccount is IERC165, IERC1271, IERC6551Account {
     function lock(
         bytes memory permission
     ) public {
+
         bytes4 valid = _isValidSignature(lockHash(), permission);
         if (valid != IERC1271.isValidSignature.selector) revert();
 
@@ -121,6 +122,15 @@ contract SimpleAccount is IERC165, IERC1271, IERC6551Account {
             interfaceId == type(IERC6551Account).interfaceId);
     }
 
+    function onERC721Received(
+        address operator,
+        address from,
+        uint256 tokenId,
+        bytes calldata data
+    ) external returns (bytes4) {
+        return IERC721Receiver.onERC721Received.selector;
+    }
+
     function isValidSignature(bytes32 hash, bytes memory signature)
         external
         view
@@ -133,7 +143,6 @@ contract SimpleAccount is IERC165, IERC1271, IERC6551Account {
         view
         returns (bytes4 magicValue)
     {
-        console2.log(owner());
         bool isValid = SignatureChecker.isValidSignatureNow(owner(), hash, signature);
 
         if (isValid) {
@@ -142,4 +151,5 @@ contract SimpleAccount is IERC165, IERC1271, IERC6551Account {
 
         return "";
     }
+
 }

@@ -11,6 +11,7 @@ import {IERC721} from "openzeppelin-contracts/token/ERC721/IERC721.sol";
 import {console2} from "forge-std/console2.sol";
 
 contract Market {
+
     struct Listing {
         uint256 price;
         uint256 lockedNonce;
@@ -18,9 +19,7 @@ contract Market {
 
     mapping(address => Listing) public listings;
 
-    constructor() {
-
-    }
+    constructor() {}
 
     function publish(
         address account,
@@ -29,7 +28,6 @@ contract Market {
     ) public {
 
         SimpleAccount acc = SimpleAccount(payable(account));
-
         require(msg.sender == acc.owner(), "");
 
         acc.lock(lockSignature);
@@ -41,23 +39,29 @@ contract Market {
     }
 
     function buy(address account) public payable {
-        (
-            uint256 chainId,
-            address tokenContract,
-            uint256 tokenId
-        ) = IERC6551Account(payable(account)).token();
+        SimpleAccount acc = SimpleAccount(payable(account));
+
+        (uint256 chainId, address tokenContract, uint256 tokenId) = acc.token();
+        address seller = acc.owner();
 
         // check chainId?
 
         uint256 price = listings[account].price;
 
+        (bool sent,) = seller.call{value: msg.value}("");
+        require(sent, "Failed to send Ether");
+
         require(msg.value == price, "Incorrect price");
+
+        require(acc.nonce() == listings[account].lockedNonce, "Account is unlocked");
 
         IERC721(tokenContract).transferFrom(
             IERC721(tokenContract).ownerOf(tokenId),
             msg.sender,
             tokenId
         );
+
+        delete listings[account];
 
     }
 }
