@@ -1,8 +1,7 @@
 import { useAccount } from 'wagmi'
+import Container from '@mui/material/Container'
 
-import { Account } from './components/boilerplate/Account'
 import { NetworkSwitcher } from './components/boilerplate/NetworkSwitcher'
-import { Balance } from './components/boilerplate/Balance'
 import Header from './components/header'
 import MarketTabs from './components/MarketTabs'
 
@@ -13,14 +12,13 @@ export function App() {
     <>
       <Header />
       {isConnected && (
-        <>
+        <Container>
           <hr />
           <h2>Network</h2>
           <NetworkSwitcher />
           <br />
-          <hr />
           <MarketTabs />
-        </>
+        </ Container>
       )}
     </>
   )
