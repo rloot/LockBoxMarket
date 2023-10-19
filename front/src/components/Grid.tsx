@@ -1,7 +1,12 @@
 import { GridCard } from "./GridCard"
 
-export const Grid = () => {
+export const Grid = ({ NFTs }) => {
+  console.log(NFTs);
   return (
-    <GridCard cid={"QmVAX7F7RQGfk4yVZm8qWsonVtMG7djoBHMwyf4k8VrV5g"} />
+    <>
+      {NFTs && NFTs.map(nft =>{
+        return <GridCard key={nft.cid} cid={nft.cid} />
+      })}
+    </>
   )
 };
