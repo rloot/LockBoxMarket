@@ -19,12 +19,6 @@ export function App() {
           <NetworkSwitcher />
           <br />
           <hr />
-          <h2>Account</h2>
-          <Account />
-          <br />
-          <hr />
-          <h2>Balance</h2>
-          <Balance />
           <MarketTabs />
         </>
       )}

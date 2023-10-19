@@ -4,17 +4,15 @@ import { Grid } from "./Grid";
 export default function MyNFTsTab () {
   const { data: myNFTs, isLoading } = useGetMyNFTs();
 
-
   const myNFTsParsed = !isLoading && myNFTs.reduce((carry, nft) => {
-    let data = []
-    nft?.nft_data.forEach(e => {
-      data.push({
+    const flat = nft?.nft_data.map(e => {
+      return {
         'contract_address': nft.contract_address,
         'token_id':  e.token_id,
         'cid': e.token_url
-      })
+      }
     })
-    return [...data, ...carry ] ;
+    return [...carry, ...flat ] ;
   }, [])
 
   return (
