@@ -14,7 +14,7 @@ export const GridCard = ({ cid }) => {
     <>
     {!isLoading
       && (
-        <Card sx={{ maxWidth: 300 }}>
+        <Card sx={{ maxWidth: 300, minWidth: 200 }}>
           <CardMedia
             sx={{ height: 160 }}
             image={NFTData?.image}
@@ -29,8 +29,7 @@ export const GridCard = ({ cid }) => {
             </Typography>
           </CardContent>
           <CardActions>
-            <Button size="small">Share</Button>
-            <Button size="small">Learn More</Button>
+            <Button size="small">Sell</Button>
           </CardActions>
         </Card>
       )
