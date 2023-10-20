@@ -1,9 +1,12 @@
+import { useState } from 'react';
 import Card from '@mui/material/Card';
 import CardActions from '@mui/material/CardActions';
 import CardContent from '@mui/material/CardContent';
 import CardMedia from '@mui/material/CardMedia';
 import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+import Box from '@mui/material/Box';
+import Modal from '@mui/material/Modal';
 
 import { useGetCIDData } from '../hooks/useGetCIDMetadata';
 
@@ -15,8 +18,11 @@ export const GridCard = ({
   cid,
   tokenId,
   tokenContract,
-  modalHandleOpen,
 }) => {
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
   const { data: NFTData, isLoading } = useGetCIDData(cid)
 
   const accountRegisterParams = [ '0xEc3CdC2A15D4D058A3Ad37ecDbBc9c7b4c5Fb735', 5001, tokenContract, tokenId, 0 ]
@@ -28,15 +34,50 @@ export const GridCard = ({
     args: accountRegisterParams
   })
 
+  function SellModal() {
+    const style = {
+      position: 'absolute',
+      top: '50%',
+      left: '50%',
+      transform: 'translate(-50%, -50%)',
+      width: 400,
+      bgcolor: 'background.paper',
+      border: '2px solid #000',
+      boxShadow: 24,
+      p: 4,
+    };
+
+    return (
+      <div>
+        <Modal
+          open={open}
+          onClose={handleClose}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={style}>
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              Place bid 
+            </Typography>
+            <Button>Approve</Button>
+            <Button>Sign</Button>
+            <Button>Place bid</Button>
+          </Box>
+        </Modal>
+      </div>
+    );
+  }
+
   return (
     <>
+    <SellModal />
     {!isLoading
       && (
         <Card sx={{ maxWidth: 300, minWidth: 200 }}>
           <CardMedia
             sx={{ height: 160 }}
             image={NFTData?.image}
-            title="green iguana"
+            title="NFTImage"
           />
           <CardContent>
             <Typography gutterBottom variant="h6" component="div">
@@ -47,7 +88,7 @@ export const GridCard = ({
             </Typography>
           </CardContent>
           <CardActions>
-            <Button onClick={modalHandleOpen} size="small">Sell</Button>
+            <Button onClick={handleOpen} size="small">Sell</Button>
           </CardActions>
         </Card>
       )
