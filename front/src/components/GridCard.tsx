@@ -15,6 +15,7 @@ export const GridCard = ({
   cid,
   tokenId,
   tokenContract,
+  modalHandleOpen,
 }) => {
   const { data: NFTData, isLoading } = useGetCIDData(cid)
 
@@ -46,7 +47,7 @@ export const GridCard = ({
             </Typography>
           </CardContent>
           <CardActions>
-            <Button size="small">Sell</Button>
+            <Button onClick={modalHandleOpen} size="small">Sell</Button>
           </CardActions>
         </Card>
       )
