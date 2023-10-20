@@ -14,12 +14,14 @@ export const useGetCIDData = (cid) => {
     queryKey: ['NFTMetadata', cid],
     queryFn: async () => await axios.get(requestUrl, AXIOS_CONFIG),
     select: (response) => {
-      const data = response?.data
+      const cidMetadata = response?.data
 
+      console.log(cidMetadata)
       return {
-        name: data?.name,
-        description: data?.description,
-        image: `https://chargedparticles.infura-ipfs.io/ipfs/${data?.image}`
+        name: cidMetadata?.name,
+        description: cidMetadata?.description,
+        image: `https://chargedparticles.infura-ipfs.io/ipfs/${cidMetadata?.image}`,
+        // address: data?.
       }
     }
   });

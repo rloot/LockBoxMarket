@@ -7,8 +7,19 @@ import Typography from '@mui/material/Typography';
 
 import { useGetCIDData } from '../hooks/useGetCIDMetadata';
 
+import { useContractRead } from 'wagmi'
+import SimpleAccountABI from '../../../out/SimpleERC6551Account.sol/SimpleERC6551Account.json'
+import RegisterABI from '../../../out/ERC6551Registry.sol/ERC6551Registry.json' 
+
 export const GridCard = ({ cid }) => {
   const { data: NFTData, isLoading } = useGetCIDData(cid)
+
+//   const contractRead = useContractRead({
+//     address: '0x5EfE84aaade508741AcfA1853b4A732d0095F2E6',
+//     abi: RegisterABI,
+//     functionName: 'account',
+//     args: [ NFTData.address ]
+// })
 
   return (
     <>

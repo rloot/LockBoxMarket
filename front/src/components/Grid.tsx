@@ -2,6 +2,7 @@ import Stack from '@mui/material/Stack'
 import { GridCard } from "./GridCard"
 
 export const Grid = ({ NFTs }) => {
+  console.log(NFTs)
   return (
     <Stack direction="row" spacing={4} useFlexGap flexWrap="wrap">
       {NFTs && NFTs.map(nft =>{
