@@ -62,7 +62,6 @@ export const GridCard = ({
       p: 4,
     };
 
-    console.log(data, isLoading, isSuccess)
     return (
       <div>
         <Modal
