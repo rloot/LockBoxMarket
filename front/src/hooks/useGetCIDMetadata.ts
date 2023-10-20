@@ -16,7 +16,6 @@ export const useGetCIDData = (cid) => {
     select: (response) => {
       const cidMetadata = response?.data
 
-      console.log(cidMetadata)
       return {
         name: cidMetadata?.name,
         description: cidMetadata?.description,
