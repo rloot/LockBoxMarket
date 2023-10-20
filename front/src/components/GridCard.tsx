@@ -18,6 +18,7 @@ import { useGetCIDData } from '../hooks/useGetCIDMetadata';
 import ERC721 from '../../../out/ERC721.sol/ERC721.json'
 import RegisterABI from '../../../out/ERC6551Registry.sol/ERC6551Registry.json' 
 import SimpleAccountABI from '../../../out/Account.sol/SimpleAccount.json'
+import MarketABI from '../../../out/Market.sol/Market.json'
 
 export const GridCard = ({
   cid,
@@ -68,6 +69,32 @@ export const GridCard = ({
     message: lockHash,
   })
 
+  const {
+    data: publishData,
+    isLoading: isPublishLoading,
+    isSuccess: isPublishSuccess,
+    write: publish
+  } = useContractWrite({
+    address: '0x3c601dae77F6f5cAba83a2648c77ebff17576F06',
+    abi: MarketABI.abi,
+    functionName: 'publish',
+    args: [ TBAAddress, 1n, lockHashSignatureData ]
+  })
+
+  const {
+    data: lockData,
+    isLoading: isLockLoading,
+    isSuccess: isLockSuccess,
+    write: lock 
+  } = useContractWrite({
+    address: TBAAddress,
+    abi: SimpleAccountABI.abi,
+    functionName: 'lock',
+    args: [ lockHashSignatureData ]
+  })
+
+  console.log(TBAAddress, lockData, lockHashSignatureData)
+
   function SellModal() {
     const style = {
       position: 'absolute',
@@ -95,7 +122,7 @@ export const GridCard = ({
             </Typography>
             <Button onClick={() => approveMarket()}>Approve</Button>
             <Button onClick={() => signMessage()}>Sign</Button>
-            <Button>Place bid</Button>
+            <Button onClick={() => lock()}>Place bid</Button>
           </Box>
         </Modal>
       </div>
