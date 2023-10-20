@@ -8,14 +8,16 @@ import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 
+import {
+  useContractRead,
+  useContractWrite,
+  useSignMessage,
+} from 'wagmi'
+
 import { useGetCIDData } from '../hooks/useGetCIDMetadata';
-
-import { useContractRead } from 'wagmi'
-import { useContractWrite } from 'wagmi'
-
-import SimpleAccountABI from '../../../out/SimpleERC6551Account.sol/SimpleERC6551Account.json'
 import ERC721 from '../../../out/ERC721.sol/ERC721.json'
 import RegisterABI from '../../../out/ERC6551Registry.sol/ERC6551Registry.json' 
+import SimpleAccountABI from '../../../out/Account.sol/SimpleAccount.json'
 
 export const GridCard = ({
   cid,
@@ -30,11 +32,18 @@ export const GridCard = ({
 
   const accountRegisterParams = [ '0xEc3CdC2A15D4D058A3Ad37ecDbBc9c7b4c5Fb735', 5001, tokenContract, tokenId, 0 ]
   
-  const { data: TBAAddress, isLoading: isTBAAccount } = useContractRead({
+  const { data: TBAAddress, isLoading: isTBAAccountLoading } = useContractRead({
     address: '0x5EfE84aaade508741AcfA1853b4A732d0095F2E6',
     abi: RegisterABI.abi,
     functionName: 'account',
     args: accountRegisterParams
+  })
+
+  const { data: lockHash, isLoading: isLockHashLoading, error } = useContractRead({
+    address: TBAAddress,
+    abi: SimpleAccountABI.abi,
+    functionName: 'lockHash',
+    enabled: !isTBAAccountLoading && !!TBAAddress && open
   })
 
   const {
@@ -47,6 +56,16 @@ export const GridCard = ({
     abi: ERC721.abi,
     functionName: 'approve',
     args: [ '0xd57082Eb808573164f4A92898c03CBc695E4CaFF', tokenId ]
+  })
+
+  const {
+    data: lockHashSignatureData,
+    isError: isLockHashSignatureError,
+    isLoading: isLockHashSignatureLoading,
+    isSuccess: isLockHashSignatureSuccess,
+    signMessage
+  } = useSignMessage({
+    message: lockHash,
   })
 
   function SellModal() {
@@ -75,7 +94,7 @@ export const GridCard = ({
               Place bid 
             </Typography>
             <Button onClick={() => approveMarket()}>Approve</Button>
-            <Button>Sign</Button>
+            <Button onClick={() => signMessage()}>Sign</Button>
             <Button>Place bid</Button>
           </Box>
         </Modal>
