@@ -15,9 +15,11 @@ contract Market {
     struct Listing {
         uint256 price;
         uint256 lockedNonce;
+        uint256 index;
     }
 
-    mapping(address => Listing) public listings;
+    mapping(address => Listing) private _listingsInfo;
+    address[] private _listings;
 
     constructor() {}
 
@@ -32,10 +34,53 @@ contract Market {
 
         acc.lock(lockSignature);
 
-        listings[account] = Listing(
+        _listingsInfo[account] = Listing(
             price,
-            acc.nonce()
+            acc.nonce(),
+            _listings.length
         );
+        _listings.push(account);
+    }
+
+    function listingInfo(address account) external view returns (Listing memory){
+        return _listingsInfo[account];
+    }
+    function listingsInfo(address[] memory accounts) external view returns (Listing[] memory){
+        Listing[] memory results = new Listing[](accounts.length);
+        for (uint i = 0; i < accounts.length; i++) {
+            results[i] = _listingsInfo[accounts[i]];
+        }
+        return results;
+    }
+
+    function listings(uint256 from, uint256 amount) 
+        external view returns(address[] memory)
+    {
+        address[] memory results = new address[](amount);
+
+        if (from + amount > _listings.length) {
+            amount = _listings.length - from;
+        }
+
+        for (uint256 i = 0; i < amount; ++i) {
+            // results[i] = _listingsInfo[_listings[from + i]];
+            results[i] = _listings[from + i];
+        }
+
+        return results;
+    }
+
+
+    function listings() external view returns(address[] memory)
+    {
+        address[] memory results = new address[](_listings.length);
+
+        for (uint256 i = 0; i < _listings.length; ++i) {
+            results[i] = _listings[i];
+            // results[i] = _listingsInfo[_listings[i]];
+        }
+
+        return results;
     }
 
     function buy(address account) public payable {
@@ -46,14 +91,14 @@ contract Market {
 
         // check chainId?
 
-        uint256 price = listings[account].price;
+        uint256 price = _listingsInfo[account].price;
 
         (bool sent,) = seller.call{value: msg.value}("");
         require(sent, "Failed to send Ether");
 
         require(msg.value == price, "Incorrect price");
 
-        require(acc.nonce() == listings[account].lockedNonce, "Account is unlocked");
+        require(acc.nonce() == _listingsInfo[account].lockedNonce, "Account is unlocked");
 
         IERC721(tokenContract).transferFrom(
             IERC721(tokenContract).ownerOf(tokenId),
@@ -61,7 +106,20 @@ contract Market {
             tokenId
         );
 
-        delete listings[account];
+        uint256 prevPos = _listingsInfo[account].index;
+        delete _listingsInfo[account];
+
+        if (_listings.length > 1) {
+            // get sold listing index in listing array
+            // overwrite listing at prevPos index with last listing
+            _listings[prevPos] = _listings[_listings.length - 1];
+            // update listingInfo index with prevPos
+            _listingsInfo[_listings[prevPos]].index = prevPos;
+            // delete last listing
+            _listings.pop();
+        } else {
+            delete _listings[0];
+        }
 
     }
 }

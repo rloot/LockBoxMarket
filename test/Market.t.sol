@@ -41,11 +41,11 @@ contract MarketTest is Test {
         registry = new ERC6551Registry();
         implementation = new SimpleAccount();
         market = new Market();
-
-        nft.mint(SELLER, 1);
     }
 
     function test_AccountInitialization() public {
+        nft.mint(SELLER, 1);
+
         address payable account = payable(
             registry.createAccount(
                 address(implementation),
@@ -62,6 +62,8 @@ contract MarketTest is Test {
 
     }
     function test_publish() public {
+        nft.mint(SELLER, 1);
+
         address payable account = createAccount(address(nft), 1);
 
         bytes memory permission = lockPermission(SELLER_PK, account);
@@ -69,12 +71,14 @@ contract MarketTest is Test {
         vm.prank(SELLER);
         market.publish(account, 1 ether, permission);
 
-        (uint256 price, uint256 nonce) = market.listings(account);
-        assertEq(price, 1 ether);
-        assertEq(nonce, 1);
+        Market.Listing memory listing = market.listingInfo(account);
+        assertEq(listing.price, 1 ether);
+        assertEq(listing.lockedNonce, 1);
     }
 
     function test_buy() public {
+        nft.mint(SELLER, 1);
+
         address payable account = createAccount(address(nft), 1);
 
         bytes memory permission = lockPermission(SELLER_PK, account);
@@ -93,6 +97,8 @@ contract MarketTest is Test {
         assertEq(SimpleAccount(account).owner(), BUYER);
     }
     function test_buy_unlocked() public {
+        nft.mint(SELLER, 1);
+
         address payable account = createAccount(address(nft), 1);
 
         bytes memory permission = lockPermission(SELLER_PK, account);
@@ -112,6 +118,8 @@ contract MarketTest is Test {
 
 
     function test_buy_unlocked_and_locked() public {
+        nft.mint(SELLER, 1);
+
         address payable account = createAccount(address(nft), 1);
 
         bytes memory permission = lockPermission(SELLER_PK, account);
@@ -131,6 +139,37 @@ contract MarketTest is Test {
 
         vm.expectRevert("Account is unlocked");
         market.buy{value: 1 ether}(account);
+    }
+
+    function test_listing_getters() public {
+        uint256 amount = 11;
+        address[] memory accounts = new address[](amount); 
+
+        vm.startPrank(SELLER);        
+        for (uint i = 0; i < amount; i++) {
+            nft.mint(SELLER, i);
+            address account = createAccount(address(nft), i);
+            accounts[i] = account;
+            bytes memory permission = lockPermission(SELLER_PK, account);
+            nft.approve(address(market), i);
+            market.publish(account, 1 ether, permission);
+            Market.Listing memory listing = market.listingInfo(account);
+            assertEq(listing.price, 1 ether);
+            assertEq(listing.index, i);
+            console2.log(i, account);
+        }
+        vm.stopPrank();
+
+
+        vm.deal(BUYER, 1 ether);
+
+        vm.prank(BUYER);
+        market.buy{value: 1 ether}(accounts[1]);
+
+        address[] memory listings = market.listings();
+        assertEq(listings.length, amount - 1);
+        assertEq(market.listingInfo(listings[1]).index, 1);
+
     }
 
     /// utils
