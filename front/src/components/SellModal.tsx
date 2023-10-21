@@ -2,6 +2,8 @@ import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
+import ButtonGroup from '@mui/material/ButtonGroup';
+import Stack from '@mui/material/Stack';
 
 import {
   useContractRead,
@@ -105,8 +107,6 @@ export const SellModal = ({
     args: [TBAAddress, 1n, lockHashSignatureData]
   })
 
-  console.log(TBAAddress);
-
   const style = {
     position: 'absolute',
     top: '50%',
@@ -117,6 +117,7 @@ export const SellModal = ({
     border: '2px solid #000',
     boxShadow: 24,
     p: 4,
+    // textAlign: 'center',
   };
 
   return (
@@ -127,14 +128,21 @@ export const SellModal = ({
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Place bid
+        <Stack sx={style}>
+          <Typography id="modal-modal-title" variant="h5" component="h2">
+           Place order 
           </Typography>
-          <Button onClick={() => approveMarket()}>Approve</Button>
-          <Button onClick={() => signTypedData()}>Sign</Button>
-          <Button onClick={() => publish()}>Place bid</Button>
-        </Box>
+          <Box textAlign="center">
+            <ButtonGroup size="large" variant="contained" aria-label="outlined primary button group" sx={{ mt: 2}}>
+              <Button onClick={() => approveMarket()}>Approve</Button>
+              <Button onClick={() => signTypedData()}>Sign</Button>
+              <Button onClick={() => publish()}>Bid</Button>
+            </ButtonGroup>
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="caption">{TBAAddress}</Typography>
+            </Box>
+          </Box>
+        </Stack>
       </Modal>
     </div>
   );
