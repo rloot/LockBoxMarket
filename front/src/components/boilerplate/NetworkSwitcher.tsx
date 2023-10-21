@@ -18,12 +18,11 @@ export function NetworkSwitcher() {
       <br />
       {switchNetwork && (
         <>
-          {/* <Typography> Switch to:{' '} </Typography>  */}
           {chains.map((x) =>
             x.id === chain?.id ? null : (
-              <Box m={1} display="inline"> 
+              <Box mt={1} display="inline"> 
                 <Button variant="outlined" size="small" key={x.id} onClick={() => switchNetwork(x.id)}>
-                  {x.name}
+                  Connect {x.name}
                   {isLoading && x.id === pendingChainId && ' (switching)'}
                 </Button>
               </Box>

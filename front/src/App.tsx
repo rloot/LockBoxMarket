@@ -1,4 +1,4 @@
-import { useAccount } from 'wagmi'
+import { useAccount, useNetwork } from 'wagmi'
 import Container from '@mui/material/Container'
 
 import { NetworkSwitcher } from './components/boilerplate/NetworkSwitcher'
@@ -7,15 +7,16 @@ import Header from './components/header'
 
 export function App() {
   const { isConnected } = useAccount()
+  const { chain } = useNetwork()
 
   return (
     <>
       <Header />
       {isConnected && (
         <Container>
-          <NetworkSwitcher />
-          <br />
-          <MarketTabs />
+          {chain?.unsupported ? (
+            <NetworkSwitcher />
+          ) : <MarketTabs />}
         </ Container>
       )}
     </>

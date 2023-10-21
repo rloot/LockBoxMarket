@@ -17,7 +17,7 @@ contract Market {
         uint256 lockedNonce;
     }
 
-    mapping(address => Listing) public listings;
+    mapping(address => Listing) public listin<MarketTabs />gs;
 
     constructor() {}
 
