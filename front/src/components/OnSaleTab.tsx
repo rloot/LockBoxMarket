@@ -1,35 +1,62 @@
+import { useState } from "react";
 import {
   useContractRead,
   useNetwork,
   useContractWrite,
 } from "wagmi"
 
+import { isAddress } from 'viem'
+
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
+import TextField from "@mui/material/TextField";
+
 import marketAbi from '../../../out/Market.sol/Market.json'
 import {addressesByChain } from "../globals";
-import { Button } from "@mui/material";
 
 export default function OnSaleTab() {
+  const [textFieldValue, setTextFieldValue] = useState('');
   const { chain } = useNetwork()
 
   const { data: saleData } = useContractRead({
     address: addressesByChain[chain?.id].MARKET,
     abi: marketAbi.abi,
     functionName: 'listings',
-    args: ['0x3cEf61cc7aCD4e8a8532252C8A51cd4137C5c379']
+    args: [ textFieldValue ],
+    enabled: isAddress(textFieldValue)
   });
 
   const { data, isLoading, isSuccess, write: buy } = useContractWrite({
     address: addressesByChain[chain?.id].MARKET,
     abi: marketAbi.abi,
     functionName: 'buy',
-    args: ['0x3cEf61cc7aCD4e8a8532252C8A51cd4137C5c379'],
+    args: [ textFieldValue ],
     value: 1n,
   })
 
-  console.log(saleData)
+  const handleTextFieldChange = (event) => {
+    setTextFieldValue(event.target.value);
+  };
+
   return (
-    <>
-      <Button onClick={() => buy}> BUY </Button>
-    </>
+    <Box
+      component="form"
+      sx={{
+        '& > :not(style)': { m: 1, width: '25vw' },
+      }}
+      noValidate
+      autoComplete="off"
+    >
+      <TextField
+        id="outlined-basic"
+        label="TBA Address"
+        variant="outlined"
+        value={textFieldValue}
+        onChange={handleTextFieldChange}
+      />
+      <Box>
+        <Button variant="contained" size="large" onClick={() => buy}> BUY </Button>
+      </Box>
+    </Box>
   )
 };

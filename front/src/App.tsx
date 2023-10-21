@@ -13,7 +13,6 @@ export function App() {
       <Header />
       {isConnected && (
         <Container>
-          <h2>Network</h2>
           <NetworkSwitcher />
           <br />
           <MarketTabs />
