@@ -3,7 +3,6 @@ import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
 import MyNFTsTab from './MyNFTsTab';
 
 function TabPanel(props) {
@@ -19,7 +18,7 @@ function TabPanel(props) {
     >
       {value === index && (
         <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
+          {children}
         </Box>
       )}
     </div>

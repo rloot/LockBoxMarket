@@ -7,8 +7,11 @@ import {
   useContractRead,
   useContractWrite,
   useSignTypedData,
+  useNetwork,
+  useAccount
 } from 'wagmi'
 
+import { addressesByChain } from '../globals';
 import ERC721 from '../../../out/ERC721.sol/ERC721.json'
 import RegisterABI from '../../../out/ERC6551Registry.sol/ERC6551Registry.json' 
 import SimpleAccountABI from '../../../out/Account.sol/SimpleAccount.json'
@@ -20,12 +23,14 @@ export const SellModal = ({
   open,
   setOpen,
 }) => {
-  const handleClose = () => setOpen(false);
+  const { chain } = useNetwork();
+  const { address: connectedAddress } = useAccount();
 
-  const accountRegisterParams = ['0xEc3CdC2A15D4D058A3Ad37ecDbBc9c7b4c5Fb735', 5001, tokenContract, tokenId, 0]
+  const ADDRESSES =  addressesByChain[chain?.id ?? 5001];
 
+  const accountRegisterParams = [ADDRESSES.ACCOUNT_IMPLEMENTATION, 5001, tokenContract, tokenId, 0]
   const { data: TBAAddress, isLoading: isTBAAccountLoading } = useContractRead({
-    address: '0x5EfE84aaade508741AcfA1853b4A732d0095F2E6',
+    address: ADDRESSES.REGISTRY,
     abi: RegisterABI.abi,
     functionName: 'account',
     args: accountRegisterParams
@@ -47,7 +52,7 @@ export const SellModal = ({
     address: tokenContract,
     abi: ERC721.abi,
     functionName: 'approve',
-    args: ['0xd57082Eb808573164f4A92898c03CBc695E4CaFF', tokenId]
+    args: [ADDRESSES.MARKET, tokenId]
   })
 
   const { data: nonce } = useContractRead({
@@ -60,7 +65,7 @@ export const SellModal = ({
     name: 'SimpleAccount',
     version: '1.0.0',
     chainId: 5001,
-    verifyingContract: '0xEc3CdC2A15D4D058A3Ad37ecDbBc9c7b4c5Fb735',
+    verifyingContract: ADDRESSES.ACCOUNT_IMPLEMENTATION,
   } as const
 
   const types = {
@@ -71,7 +76,7 @@ export const SellModal = ({
   } as const
 
   const message = {
-    owner: '0x48F54e595bf039CF30fa5F768c0b57EAC6508a06'.toLocaleLowerCase(),
+    owner: connectedAddress,
     nonce: nonce
   } as const
 
@@ -94,32 +99,11 @@ export const SellModal = ({
     isSuccess: isPublishSuccess,
     write: publish
   } = useContractWrite({
-    address: '0x3c601dae77F6f5cAba83a2648c77ebff17576F06',
+    address: ADDRESSES.MARKET,
     abi: MarketABI.abi,
     functionName: 'publish',
     args: [TBAAddress, 1n, lockHashSignatureData]
   })
-
-  const {
-    data: lockData,
-    isLoading: isLockLoading,
-    isSuccess: isLockSuccess,
-    write: lock
-  } = useContractWrite({
-    address: TBAAddress,
-    abi: SimpleAccountABI.abi,
-    functionName: 'lock',
-    args: [lockHashSignatureData]
-  })
-
-  const { data: isValidSignature, error: isValidSignatureERROR } = useContractRead({
-    address: TBAAddress,
-    abi: SimpleAccountABI.abi,
-    functionName: 'isValidSignature',
-    args: [lockHash, lockHashSignatureData],
-  })
-
-  console.log(domain, message, isValidSignature)
 
   const style = {
     position: 'absolute',
@@ -137,7 +121,7 @@ export const SellModal = ({
     <div>
       <Modal
         open={open}
-        onClose={handleClose}
+        onClose={() => setOpen(false)}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >

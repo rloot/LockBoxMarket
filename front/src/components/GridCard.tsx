@@ -14,10 +14,9 @@ export const GridCard = ({
   tokenId,
   tokenContract,
 }) => {
-  const { data: NFTData, isLoading: isNFTDataLoading } = useGetCIDData(cid)
-
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
+  const { data: NFTData, isLoading: isNFTDataLoading } = useGetCIDData(cid)
 
   return (
     <>
