@@ -15,8 +15,6 @@ contract Market {
     struct Listing {
         uint256 price;
         uint256 lockedNonce;
-        uint256 tokenId;
-        address tokenContract;
     }
 
     mapping(address => Listing) public listings;
@@ -34,13 +32,9 @@ contract Market {
 
         acc.lock(lockSignature);
 
-        (, address tokenContract, uint256 tokenId) = acc.token();
-
         listings[account] = Listing(
             price,
-            acc.nonce(),
-            tokenId,
-            tokenContract
+            acc.nonce()
         );
     }
 
