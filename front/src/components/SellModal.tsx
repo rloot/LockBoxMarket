@@ -105,6 +105,8 @@ export const SellModal = ({
     args: [TBAAddress, 1n, lockHashSignatureData]
   })
 
+  console.log(TBAAddress);
+
   const style = {
     position: 'absolute',
     top: '50%',
