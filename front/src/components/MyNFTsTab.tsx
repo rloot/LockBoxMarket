@@ -1,3 +1,5 @@
+import CircularProgress from '@mui/material/CircularProgress';
+import Box from '@mui/material/Box';
 import { useGetMyNFTs } from "../hooks/useGetMyNFTs";
 import { Grid } from "./Grid";
 
@@ -17,7 +19,10 @@ export default function MyNFTsTab () {
 
   return (
     <>
-      <Grid NFTs={myNFTsParsed} />
+      {isLoading
+        ? <Box textAlign="center" mt={5}><CircularProgress /></Box>
+          : <Grid NFTs={myNFTsParsed} />
+      }
     </>
   )
 

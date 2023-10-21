@@ -13,6 +13,7 @@ export const GridCard = ({
   cid,
   tokenId,
   tokenContract,
+  gridType = 'buy'
 }) => {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
@@ -43,7 +44,9 @@ export const GridCard = ({
             </Typography>
           </CardContent>
           <CardActions>
-            <Button onClick={handleOpen} size="small">Sell</Button>
+            { gridType === 'buy' && (
+              <Button onClick={handleOpen} size="small">Sell</Button>
+            )}
           </CardActions>
         </Card>
       )
