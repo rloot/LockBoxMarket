@@ -69,7 +69,7 @@ contract MarketTest is Test {
         vm.prank(SELLER);
         market.publish(account, 1 ether, permission);
 
-        (uint256 price, uint256 nonce, ,) = market.listings(account);
+        (uint256 price, uint256 nonce) = market.listings(account);
         assertEq(price, 1 ether);
         assertEq(nonce, 1);
     }
