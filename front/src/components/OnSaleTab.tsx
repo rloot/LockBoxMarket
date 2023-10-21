@@ -43,15 +43,17 @@ export default function OnSaleTab() {
     enabled: isAddress(textFieldValue)
   });
 
-  console.log(locked)
+  console.log(saleData)
 
-  const { data, isLoading, isSuccess, write: buy } = useContractWrite({
+  const { data, isLoading, isSuccess, write: buy, error } = useContractWrite({
     address: addressesByChain[chain?.id].MARKET,
     abi: marketAbi.abi,
     functionName: 'buy',
     args: [ textFieldValue ],
     value: 1n,
   })
+
+  console.log(error)
 
   const handleTextFieldChange = (event) => {
     setTextFieldValue(event.target.value);
@@ -75,11 +77,16 @@ export default function OnSaleTab() {
           onChange={handleTextFieldChange}
         />
         <Box>
-          <Button variant="contained" size="large" onClick={() => buy}> BUY </Button>
+          <Button variant="contained" size="large" onClick={() => buy()}> BUY </Button>
         </Box>
       </Box>
       <Box mt={2}>
-        {locked && (<Chip label="Locked" variant="outlined" />)}
+       {isAddress(textFieldValue) && (
+          <>
+          <Chip label={locked ? 'Locked' : 'Not locked'} variant="outlined" />
+          <Chip label={saleData ? saleData[0] > 0n ? 'On sale' : 'Not on Sale' : ''} variant="outlined" />
+          </>
+       )} 
       </Box>
     </Stack>
   )
