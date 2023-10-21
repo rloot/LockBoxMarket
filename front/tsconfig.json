@@ -2,7 +2,7 @@
   "compilerOptions": {
     "allowJs": false,
     "allowSyntheticDefaultImports": true,
-    "esModuleInterop": false,
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
@@ -16,5 +16,5 @@
     "target": "ESNext",
     "useDefineForClassFields": true
   },
-  "include": ["./src"]
+  "include": ["./src", "/Users/skamy/Documents/Dev/hacks/LockBoxMarket/out/*" ]
 }
