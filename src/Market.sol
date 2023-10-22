@@ -77,28 +77,28 @@ contract Market {
 
         for (uint256 i = 0; i < _listings.length; ++i) {
             results[i] = _listings[i];
-            // results[i] = _listingsInfo[_listings[i]];
         }
 
         return results;
     }
 
     function buy(address account) public payable {
-        SimpleAccount acc = SimpleAccount(payable(account));
 
+        SimpleAccount acc = SimpleAccount(payable(account));
         (uint256 chainId, address tokenContract, uint256 tokenId) = acc.token();
         address seller = acc.owner();
 
         // check chainId?
 
-        uint256 price = _listingsInfo[account].price;
+        Listing memory listing = _listingsInfo[account];
 
         (bool sent,) = seller.call{value: msg.value}("");
         require(sent, "Failed to send Ether");
 
+        uint256 price = listing.price;
         require(msg.value == price, "Incorrect price");
 
-        require(acc.nonce() == _listingsInfo[account].lockedNonce, "Account is unlocked");
+        require(acc.nonce() == listing.lockedNonce, "Account is unlocked");
 
         IERC721(tokenContract).transferFrom(
             IERC721(tokenContract).ownerOf(tokenId),
@@ -106,15 +106,16 @@ contract Market {
             tokenId
         );
 
-        uint256 prevPos = _listingsInfo[account].index;
+        // save bought listing index in listing array
+        uint256 boughtIndex = listing.index;
+        // delete bought listing from mapping
         delete _listingsInfo[account];
 
         if (_listings.length > 1) {
-            // get sold listing index in listing array
-            // overwrite listing at prevPos index with last listing
-            _listings[prevPos] = _listings[_listings.length - 1];
-            // update listingInfo index with prevPos
-            _listingsInfo[_listings[prevPos]].index = prevPos;
+            // overwrite listing[boughtIndex] with last listing from array
+            _listings[boughtIndex] = _listings[_listings.length - 1];
+            // update moved listing index
+            _listingsInfo[_listings[boughtIndex]].index = boughtIndex;
             // delete last listing
             _listings.pop();
         } else {
