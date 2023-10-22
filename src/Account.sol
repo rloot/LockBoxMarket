@@ -16,65 +16,54 @@ import "@openzeppelin/contracts/utils/cryptography/MessageHashUtils.sol";
 
 import {console2} from "forge-std/console2.sol";
 
-contract SimpleAccount is IERC165, IERC1271, IERC721Receiver, IERC6551Account {
+import "./EIP1271.sol";
+
+contract SimpleAccount is EIP1271("SimpleAccount"), IERC721Receiver, IERC6551Account {
     
-    uint256 public nonce;
-    bool public locked;
+    uint256 private _nonce;
+    bool private _locked;
     using ECDSA for bytes32;
 
     event Locked(uint256 lockedUntil, uint256 nonce);
 
-    bytes32 immutable DOMAIN_SEPARATOR;
-
     bytes32 constant LOCK_TYPEHASH = keccak256("Lock(address owner,uint256 nonce)");
     bytes32 constant UNLOCK_TYPEHASH = keccak256("Unlock(address owner,uint256 nonce)");
 
-    constructor() {
-        DOMAIN_SEPARATOR = keccak256(
-            abi.encode(
-                keccak256(
-                    "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
-                ),
-                keccak256(bytes("SimpleAccount")),
-                keccak256(bytes("1.0.0")),
-                block.chainid,
-                address(this)
-            )
-        );
-    }
-
-    receive() external payable {}
+    constructor() {}
 
     function lockHash() public view returns (bytes32) {
-        bytes32 hashStruct = keccak256(abi.encode(LOCK_TYPEHASH, owner(), nonce));
+        bytes32 hashStruct = keccak256(abi.encode(LOCK_TYPEHASH, owner(), _nonce));
         return MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashStruct);
     }
     function unlockHash() public view returns (bytes32) {
-        bytes32 hashStruct = keccak256(abi.encode(UNLOCK_TYPEHASH, owner(), nonce));
+        bytes32 hashStruct = keccak256(abi.encode(UNLOCK_TYPEHASH, owner(), _nonce));
         return MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashStruct);
+    }
+
+    function isLocked() public view returns (bool) {
+        return _locked;
+    }
+
+    function nonce() public view virtual returns (uint256) {
+        return _nonce;
     }
 
     function lock(
         bytes memory permission
-    ) public {
+    ) isValid(lockHash(), permission) public {
 
-        bytes4 valid = _isValidSignature(lockHash(), permission);
-        if (valid != IERC1271.isValidSignature.selector) revert();
+        ++_nonce;
 
-        ++nonce;
-
-        locked = true;
+        _locked = true;
     }
 
     function unlock(
         bytes memory permission
-    ) public {
-        bytes4 valid = _isValidSignature(unlockHash(), permission);
-        if (valid != IERC1271.isValidSignature.selector) revert();
+    ) isValid(unlockHash(), permission) public {
 
-        ++nonce;
+        ++_nonce;
 
-        locked = false;
+        _locked = false;
     }
 
     function executeCall(
@@ -84,7 +73,7 @@ contract SimpleAccount is IERC165, IERC1271, IERC721Receiver, IERC6551Account {
     ) external payable returns (bytes memory result) {
         require(msg.sender == owner(), "Not token owner");
 
-        ++nonce;
+        ++_nonce;
 
         emit TransactionExecuted(to, value, data);
 
@@ -110,7 +99,7 @@ contract SimpleAccount is IERC165, IERC1271, IERC721Receiver, IERC6551Account {
         return ERC6551AccountLib.token();
     }
 
-    function owner() public view returns (address) {
+    function owner() public view override(EIP1271, IERC6551Account) returns (address) {
         (uint256 chainId, address tokenContract, uint256 tokenId) = this.token();
         if (chainId != block.chainid) return address(0);
 
@@ -123,33 +112,14 @@ contract SimpleAccount is IERC165, IERC1271, IERC721Receiver, IERC6551Account {
     }
 
     function onERC721Received(
-        address operator,
-        address from,
-        uint256 tokenId,
-        bytes calldata data
+        address,
+        address,
+        uint256,
+        bytes calldata
     ) external returns (bytes4) {
         return IERC721Receiver.onERC721Received.selector;
     }
 
-    function isValidSignature(bytes32 hash, bytes memory signature)
-        external
-        view
-        returns (bytes4 magicValue)
-    {
-        return _isValidSignature(hash, signature);
-    }
-    function _isValidSignature(bytes32 hash, bytes memory signature)
-        internal
-        view
-        returns (bytes4 magicValue)
-    {
-        bool isValid = SignatureChecker.isValidSignatureNow(owner(), hash, signature);
-
-        if (isValid) {
-            return IERC1271.isValidSignature.selector;
-        }
-
-        return "";
-    }
+   receive() external payable {}
 
 }
