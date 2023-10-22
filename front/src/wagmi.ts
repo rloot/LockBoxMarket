@@ -6,7 +6,7 @@ import { MetaMaskConnector } from 'wagmi/connectors/metaMask'
 import { publicProvider } from 'wagmi/providers/public'
 
 const { chains, publicClient, webSocketPublicClient } = configureChains(
-  [mainnet, mantleTestnet, ...(import.meta.env?.MODE === 'development' ? [goerli] : [])],
+  [mantleTestnet],
   [
     publicProvider(),
   ],

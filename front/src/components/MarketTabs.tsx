@@ -3,8 +3,10 @@ import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
+
 import MyNFTsTab from './MyNFTsTab';
+import OnSaleTab from './OnSaleTab';
+
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -19,7 +21,7 @@ function TabPanel(props) {
     >
       {value === index && (
         <Box sx={{ p: 3 }}>
-          <Typography>{children}</Typography>
+          {children}
         </Box>
       )}
     </div>
@@ -58,7 +60,7 @@ export default function MarketTabs() {
         <MyNFTsTab />
       </TabPanel>
       <TabPanel value={value} index={1}>
-        On sale
+        <OnSaleTab />
       </TabPanel>
     </Box>
   );

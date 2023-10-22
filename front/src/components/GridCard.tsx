@@ -13,11 +13,11 @@ export const GridCard = ({
   cid,
   tokenId,
   tokenContract,
+  gridType = 'buy'
 }) => {
-  const { data: NFTData, isLoading: isNFTDataLoading } = useGetCIDData(cid)
-
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
+  const { data: NFTData, isLoading: isNFTDataLoading } = useGetCIDData(cid)
 
   return (
     <>
@@ -44,7 +44,9 @@ export const GridCard = ({
             </Typography>
           </CardContent>
           <CardActions>
-            <Button onClick={handleOpen} size="small">Sell</Button>
+            { gridType === 'buy' && (
+              <Button onClick={handleOpen} size="small">Sell</Button>
+            )}
           </CardActions>
         </Card>
       )
