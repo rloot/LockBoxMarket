@@ -19,24 +19,42 @@ contract NFT is ERC721 {
     }
 }
 
-contract TestScript is Script {
-    function setUp() public {}
+contract DeployScript is Script {
+    uint256 sellerPK;
+    uint256 buyerPK;
 
-    function run() public {
-        
-        uint256 sellerPK = vm.envUint("SELLER_PRIVATE_KEY");
-        uint256 buyerPK = vm.envUint("BUYER_PRIVATE_KEY");
+    NFT nft;
+    ERC6551Registry registry;
+    SimpleAccount implementation;
+    Market market;
 
-        vm.startBroadcast();
-        NFT nft = new NFT("Bleep", "BLP");
-        ERC6551Registry registry = new ERC6551Registry();
-        SimpleAccount implementation = new SimpleAccount();
-        Market market = new Market();
+    function setUp() public {
+        sellerPK = vm.envUint("SELLER_PRIVATE_KEY");
+        buyerPK = vm.envUint("BUYER_PRIVATE_KEY");
+    }
+
+
+    function deploy01() public {
+        console2.log("DEPLOYER=", vm.addr(sellerPK));
+        vm.startBroadcast(sellerPK);
+        market = new Market();
         vm.stopBroadcast();
-        
+        console2.log("MARKET=", address(market));
+    }
+    function deploy02() public {
+        vm.startBroadcast(sellerPK);
+        implementation = new SimpleAccount();
+        vm.stopBroadcast();
+        console2.log("ACCOUNT_IMPLEMENTATION=", address(implementation));
+    }
+    function deploy03() public {
+        vm.startBroadcast(sellerPK);
+        registry = new ERC6551Registry();
+        vm.stopBroadcast();
+        console2.log("REGISTRY=", address(registry));
+    }
 
-
-        console2.log("implementation", address(implementation));
+    function AtestA() public {
         vm.deal(vm.addr(sellerPK), 2 ether);
         vm.deal(vm.addr(buyerPK), 2 ether);
         console2.log('seller', vm.addr(sellerPK), vm.addr(sellerPK).balance);
