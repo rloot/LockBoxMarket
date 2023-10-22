@@ -131,7 +131,7 @@ contract MarketTest is Test {
         SimpleAccount(account).lock(lockPermission(SELLER_PK, account));
         vm.stopPrank();
 
-        assertEq(SimpleAccount(account).locked(), true);
+        assertEq(SimpleAccount(account).isLocked(), true);
 
         vm.deal(BUYER, 1 ether);
 
