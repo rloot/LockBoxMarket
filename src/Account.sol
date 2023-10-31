@@ -54,6 +54,11 @@ contract SimpleAccount is IERC165, IERC1271, IERC721Receiver, IERC6551Account {
         return MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashStruct);
     }
 
+    function calldataHash(string calldata functionSignature, string calldata functionParameters) public view returns (bytes32) {
+        bytes32 hashStruct = keccak256(abi.encode(functionSignature, functionParameters));
+        return MessageHashUtils.toTypedDataHash(DOMAIN_SEPARATOR, hashStruct);
+    }
+
     function lock(
         bytes memory permission
     ) public {
@@ -75,6 +80,15 @@ contract SimpleAccount is IERC165, IERC1271, IERC721Receiver, IERC6551Account {
         ++nonce;
 
         locked = false;
+    }
+
+    function execute(
+        address to,
+        uint256 value,
+        bytes calldata data,
+        bytes memory permission
+    ) public {
+        
     }
 
     function executeCall(
